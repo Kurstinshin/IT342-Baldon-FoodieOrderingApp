@@ -1,0 +1,29 @@
+services:
+  # The PostgreSQL Database
+  - type: web
+    name: foodie-backend
+    env: docker
+    region: singapore
+    plan: free
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: foodie-db
+          property: connectionString
+      - key: DATABASE_USERNAME
+        fromDatabase:
+          name: foodie-db
+          property: user
+      - key: DATABASE_PASSWORD
+        fromDatabase:
+          name: foodie-db
+          property: password
+
+databases:
+  - name: foodie-db
+    databaseName: foodie
+    user: postgres
+    region: singapore
+    plan: free
