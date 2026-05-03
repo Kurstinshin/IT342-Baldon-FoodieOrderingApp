@@ -14,23 +14,23 @@ services:
           property: host
       - key: DB_PORT
         fromDatabase:
-          name: foodie-db
+          name: foodie
           property: port
       - key: DB_NAME
         fromDatabase:
-          name: foodie-db
+          name: foodie
           property: database
       - key: DATABASE_USERNAME
         fromDatabase:
-          name: foodie-db
+          name: foodie
           property: user
       - key: DATABASE_PASSWORD
         fromDatabase:
-          name: foodie-db
+          name: foodie
           property: password
 
 databases:
-  - name: foodie-db
+  - name: foodie
     databaseName: foodie
     user: postgres
     region: singapore
