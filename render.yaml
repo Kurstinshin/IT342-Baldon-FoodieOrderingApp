@@ -8,10 +8,18 @@ services:
     dockerContext: ./backend
     dockerfilePath: ./backend/Dockerfile
     envVars:
-      - key: DATABASE_URL
+      - key: DB_HOST
         fromDatabase:
           name: foodie-db
-          property: connectionString
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: foodie-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: foodie-db
+          property: database
       - key: DATABASE_USERNAME
         fromDatabase:
           name: foodie-db
