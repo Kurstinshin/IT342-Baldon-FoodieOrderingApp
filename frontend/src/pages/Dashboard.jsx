@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import "../styles/dashboard.css";
 
-const categories = ["All", "Rice", "Grilled", "Salad", "Chicken", "Burger", "Noodles", "Drinks", "Curry"];
-
 function Dashboard() {
-  const navigate = useNavigate();
   const { addToCart, cart, fetchCart } = useCart();
 
   const [searchText, setSearchText] = useState("");
-  const [activeCategory, setActiveCategory] = useState("All");
-  const [added, setAdded] = useState({});
   const [foods, setFoods] = useState([]);
 
   useEffect(() => {
@@ -28,43 +23,31 @@ function Dashboard() {
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  const filtered = foods.filter((f) => {
-    const matchCategory = activeCategory === "All" || f.category === activeCategory;
-    const matchSearch = f.name.toLowerCase().includes(searchText.toLowerCase());
-    return matchCategory && matchSearch;
-  });
+  const filtered = foods.filter((f) =>
+    f.name.toLowerCase().includes(searchText.toLowerCase())
+  );
 
   const handleAdd = (food) => {
     addToCart(food);
-    setAdded((prev) => ({ ...prev, [food.id]: true }));
-
-    setTimeout(() => {
-      setAdded((prev) => ({ ...prev, [food.id]: false }));
-    }, 700);
   };
 
   return (
     <div className="dashboard">
 
-      {/* HEADER */}
       <div className="dash-header">
-        <h2 className="dash-title">Popular Food</h2>
+        <h2>Popular Food</h2>
 
-        <div className="dash-actions">
-          <Link to="/cart">
-            🛒 {cartCount > 0 && <span>{cartCount}</span>}
-          </Link>
-        </div>
+        <Link to="/cart">
+          🛒 {cartCount > 0 && <span>{cartCount}</span>}
+        </Link>
       </div>
 
-      {/* SEARCH */}
       <input
         value={searchText}
         onChange={(e) => setSearchText(e.target.value)}
         placeholder="Search food..."
       />
 
-      {/* FOOD LIST */}
       <div className="food-grid">
         {filtered.map((food) => (
           <div key={food.id} className="food-card">
