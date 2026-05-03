@@ -10,7 +10,7 @@ services:
     envVars:
       - key: DB_HOST
         fromDatabase:
-          name: foodie-db
+          name: foodie
           property: host
       - key: DB_PORT
         fromDatabase:
@@ -32,6 +32,5 @@ services:
 databases:
   - name: foodie
     databaseName: foodie
-    user: postgres
     region: singapore
     plan: free
