@@ -33,7 +33,7 @@ export const CartProvider = ({ children }) => {
   // Run once on mount if userId exists
   useEffect(() => {
     fetchCart();
-  }, []);
+  }, [fetchCart]);
 
   const addToCart = async (product) => {
     const userId = localStorage.getItem("userId");
