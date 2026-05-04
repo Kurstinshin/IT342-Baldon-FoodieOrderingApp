@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import API from "../services/api";
 
 const CartContext = createContext();
@@ -7,7 +7,7 @@ export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
 
   // Fetch cart from backend API
-  const fetchCart = async () => {
+  const fetchCart = useCallback(async () => {
     const userId = localStorage.getItem("userId");
     if (!userId) return;
 
@@ -28,7 +28,7 @@ export const CartProvider = ({ children }) => {
     } catch (err) {
       console.error("Failed to fetch cart", err);
     }
-  };
+  }, []);
 
   // Run once on mount if userId exists
   useEffect(() => {

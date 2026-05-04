@@ -1,6 +1,7 @@
 package edu.cit.baldon.foodieorderingapp.entity;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +15,7 @@ public class Order {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
 
     @Column(nullable = false)

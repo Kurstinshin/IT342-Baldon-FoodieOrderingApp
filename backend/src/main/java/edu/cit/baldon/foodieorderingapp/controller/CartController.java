@@ -11,6 +11,7 @@ import edu.cit.baldon.foodieorderingapp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -19,7 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/v1/cart")
 public class CartController {
@@ -99,11 +100,10 @@ public class CartController {
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(createResponse(null, "Cart item not found")));
     }
     
+    @Transactional
     @DeleteMapping("/{userId}")
     public ResponseEntity<ApiResponse<Void>> clearCart(@PathVariable Long userId) {
-        // Will need @Transactional if placed in service layer, but let's just loop or use a transactional repo method
-        List<CartItem> items = cartItemRepository.findByUserId(userId);
-        cartItemRepository.deleteAll(items);
+        cartItemRepository.deleteByUserId(userId);
         return ResponseEntity.ok(createResponse((Void) null, "Cart cleared successfully"));
     }
 }
