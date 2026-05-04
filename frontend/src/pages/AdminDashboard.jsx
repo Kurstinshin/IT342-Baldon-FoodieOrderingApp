@@ -1,15 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../services/api";
+import "../styles/admin.css";
+
+const STATUS_OPTIONS = ["PENDING", "COMPLETED", "CANCELLED"];
 
 function AdminDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("products");
-  
+
   const [foods, setFoods] = useState([]);
   const [orders, setOrders] = useState([]);
-  
-  // For adding/editing food
+  const [updatingOrderId, setUpdatingOrderId] = useState(null);
+  const [statusMsg, setStatusMsg] = useState("");
+
+  // For adding / editing food
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [foodForm, setFoodForm] = useState({
@@ -17,41 +22,38 @@ function AdminDashboard() {
     description: "",
     price: "",
     category: "",
-    img: ""
+    img: "",
   });
 
-  const fetchFoods = async () => {
+  const fetchFoods = useCallback(async () => {
     try {
       const res = await API.get("/foods");
-      if (res.data.success) {
-        setFoods(res.data.data);
-      }
+      if (res.data.success) setFoods(res.data.data);
     } catch (err) {
       console.error(err);
     }
-  };
+  }, []);
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     try {
       const res = await API.get("/orders");
-      if (res.data.success) {
-        setOrders(res.data.data);
-      }
+      if (res.data.success) setOrders(res.data.data);
     } catch (err) {
       console.error(err);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchFoods();
     fetchOrders();
-  }, []);
+  }, [fetchFoods, fetchOrders]);
 
   const handleLogout = () => {
     localStorage.clear();
     navigate("/login");
   };
 
+  // ── Food handlers ─────────────────────────────────────────────────
   const handleFoodFormChange = (e) => {
     setFoodForm({ ...foodForm, [e.target.name]: e.target.value });
   };
@@ -69,18 +71,17 @@ function AdminDashboard() {
       setEditingId(null);
       fetchFoods();
     } catch (err) {
-      alert("Failed to save food");
+      alert("Failed to save food item.");
     }
   };
 
   const deleteFood = async (id) => {
-    if (window.confirm("Delete this food?")) {
-      try {
-        await API.delete(`/foods/${id}`);
-        fetchFoods();
-      } catch (err) {
-        alert("Failed to delete");
-      }
+    if (!window.confirm("Delete this food item?")) return;
+    try {
+      await API.delete(`/foods/${id}`);
+      fetchFoods();
+    } catch (err) {
+      alert("Failed to delete food item.");
     }
   };
 
@@ -90,118 +91,287 @@ function AdminDashboard() {
       description: food.description,
       price: food.price,
       category: food.category,
-      img: food.img
+      img: food.img,
     });
     setEditingId(food.id);
     setShowForm(true);
   };
 
+  // ── Order status update ────────────────────────────────────────────
+  const handleStatusChange = async (orderId, newStatus) => {
+    setUpdatingOrderId(orderId);
+    try {
+      const res = await API.patch(`/orders/${orderId}/status`, { status: newStatus });
+      if (res.data.success) {
+        setOrders((prev) =>
+          prev.map((o) => (o.id === orderId ? { ...o, status: res.data.data.status } : o))
+        );
+        setStatusMsg(`Order #${orderId} → ${newStatus}`);
+        setTimeout(() => setStatusMsg(""), 2500);
+      }
+    } catch (err) {
+      alert("Failed to update order status.");
+    } finally {
+      setUpdatingOrderId(null);
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "COMPLETED": return "#27ae60";
+      case "CANCELLED": return "#e74c3c";
+      default: return "#f39c12";
+    }
+  };
+
   return (
-    <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto", fontFamily: "sans-serif" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-        <h2>Admin Panel</h2>
-        <button onClick={handleLogout} style={{ padding: "8px 16px", background: "#ff4757", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}>
+    <div className="admin-wrapper">
+
+      {/* ── HEADER ── */}
+      <div className="admin-header">
+        <div className="admin-logo">
+          <span>🍔</span>
+          <span>Foodie Admin</span>
+        </div>
+        <button className="admin-logout-btn" onClick={handleLogout}>
           Logout
         </button>
       </div>
 
-      <div style={{ marginBottom: "20px" }}>
-        <button 
+      {/* ── TABS ── */}
+      <div className="admin-tabs">
+        <button
+          className={`admin-tab${activeTab === "products" ? " admin-tab-active" : ""}`}
           onClick={() => setActiveTab("products")}
-          style={{ padding: "10px 20px", marginRight: "10px", background: activeTab === "products" ? "#6a1b9a" : "#eee", color: activeTab === "products" ? "white" : "black", border: "none", borderRadius: "4px", cursor: "pointer" }}
         >
-          Manage Products
+          🥗 Manage Products
         </button>
-        <button 
-          onClick={() => setActiveTab("orders")}
-          style={{ padding: "10px 20px", background: activeTab === "orders" ? "#6a1b9a" : "#eee", color: activeTab === "orders" ? "white" : "black", border: "none", borderRadius: "4px", cursor: "pointer" }}
+        <button
+          className={`admin-tab${activeTab === "orders" ? " admin-tab-active" : ""}`}
+          onClick={() => { setActiveTab("orders"); fetchOrders(); }}
         >
-          View All Orders
+          📦 All Orders
         </button>
       </div>
 
-      {activeTab === "products" && (
-        <div>
-          <button onClick={() => { setShowForm(!showForm); setEditingId(null); setFoodForm({name: "", description: "", price: "", category: "", img: ""}); }} style={{ marginBottom: "20px", padding: "10px", background: "#2ed573", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}>
-            {showForm ? "Close Form" : "+ Add New Food"}
-          </button>
-
-          {showForm && (
-            <form onSubmit={submitFood} style={{ background: "#f1f2f6", padding: "20px", borderRadius: "8px", marginBottom: "20px" }}>
-              <div style={{ marginBottom: "10px" }}><input name="name" value={foodForm.name} onChange={handleFoodFormChange} placeholder="Name" required style={{ width: "100%", padding: "8px" }} /></div>
-              <div style={{ marginBottom: "10px" }}><input name="description" value={foodForm.description} onChange={handleFoodFormChange} placeholder="Description" required style={{ width: "100%", padding: "8px" }} /></div>
-              <div style={{ marginBottom: "10px" }}><input type="number" name="price" value={foodForm.price} onChange={handleFoodFormChange} placeholder="Price" required style={{ width: "100%", padding: "8px" }} /></div>
-              <div style={{ marginBottom: "10px" }}><input name="category" value={foodForm.category} onChange={handleFoodFormChange} placeholder="Category" required style={{ width: "100%", padding: "8px" }} /></div>
-              <div style={{ marginBottom: "10px" }}><input name="img" value={foodForm.img} onChange={handleFoodFormChange} placeholder="Image URL" required style={{ width: "100%", padding: "8px" }} /></div>
-              <button type="submit" style={{ padding: "10px 20px", background: "#1e90ff", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}>Save</button>
-            </form>
-          )}
-
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr style={{ background: "#eee", textAlign: "left" }}>
-                <th style={{ padding: "10px", borderBottom: "2px solid #ddd" }}>Image</th>
-                <th style={{ padding: "10px", borderBottom: "2px solid #ddd" }}>Name</th>
-                <th style={{ padding: "10px", borderBottom: "2px solid #ddd" }}>Price</th>
-                <th style={{ padding: "10px", borderBottom: "2px solid #ddd" }}>Category</th>
-                <th style={{ padding: "10px", borderBottom: "2px solid #ddd" }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {foods.map(f => (
-                <tr key={f.id} style={{ borderBottom: "1px solid #ddd" }}>
-                  <td style={{ padding: "10px" }}><img src={f.img} alt={f.name} style={{ width: "50px", height: "50px", objectFit: "cover", borderRadius: "4px" }} /></td>
-                  <td style={{ padding: "10px" }}>{f.name}</td>
-                  <td style={{ padding: "10px" }}>P{f.price}</td>
-                  <td style={{ padding: "10px" }}>{f.category}</td>
-                  <td style={{ padding: "10px" }}>
-                    <button onClick={() => editFood(f)} style={{ marginRight: "10px", padding: "5px 10px", background: "#f39c12", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}>Edit</button>
-                    <button onClick={() => deleteFood(f.id)} style={{ padding: "5px 10px", background: "#e74c3c", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}>Delete</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      {/* ── TOAST ── */}
+      {statusMsg && (
+        <div className="admin-toast">✅ {statusMsg}</div>
       )}
 
-      {activeTab === "orders" && (
-        <div>
-          <h3>All Customer Orders</h3>
-          {orders.length === 0 ? <p>No orders found.</p> : (
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      <div className="admin-content">
+
+        {/* ════════════ PRODUCTS TAB ════════════ */}
+        {activeTab === "products" && (
+          <div>
+            <button
+              className="admin-add-btn"
+              onClick={() => {
+                setShowForm(!showForm);
+                setEditingId(null);
+                setFoodForm({ name: "", description: "", price: "", category: "", img: "" });
+              }}
+            >
+              {showForm ? "✕ Close Form" : "+ Add New Food"}
+            </button>
+
+            {showForm && (
+              <form className="admin-form" onSubmit={submitFood}>
+                <h3>{editingId ? "Edit Food Item" : "Add New Food Item"}</h3>
+                <div className="admin-form-grid">
+                  <input
+                    className="admin-input"
+                    name="name"
+                    value={foodForm.name}
+                    onChange={handleFoodFormChange}
+                    placeholder="Food Name"
+                    required
+                  />
+                  <input
+                    className="admin-input"
+                    name="category"
+                    value={foodForm.category}
+                    onChange={handleFoodFormChange}
+                    placeholder="Category (e.g. Burger)"
+                    required
+                  />
+                  <input
+                    className="admin-input"
+                    type="number"
+                    name="price"
+                    value={foodForm.price}
+                    onChange={handleFoodFormChange}
+                    placeholder="Price (₱)"
+                    required
+                  />
+                  <input
+                    className="admin-input"
+                    name="img"
+                    value={foodForm.img}
+                    onChange={handleFoodFormChange}
+                    placeholder="Image URL"
+                    required
+                  />
+                </div>
+                <input
+                  className="admin-input"
+                  name="description"
+                  value={foodForm.description}
+                  onChange={handleFoodFormChange}
+                  placeholder="Description"
+                  style={{ width: "100%", marginTop: "10px" }}
+                  required
+                />
+                <div style={{ marginTop: "16px" }}>
+                  <button type="submit" className="admin-save-btn">
+                    💾 Save
+                  </button>
+                </div>
+              </form>
+            )}
+
+            <table className="admin-table">
               <thead>
-                <tr style={{ background: "#eee", textAlign: "left" }}>
-                  <th style={{ padding: "10px", borderBottom: "2px solid #ddd" }}>Order ID</th>
-                  <th style={{ padding: "10px", borderBottom: "2px solid #ddd" }}>Customer Name</th>
-                  <th style={{ padding: "10px", borderBottom: "2px solid #ddd" }}>Total Amount</th>
-                  <th style={{ padding: "10px", borderBottom: "2px solid #ddd" }}>Items</th>
-                  <th style={{ padding: "10px", borderBottom: "2px solid #ddd" }}>Status</th>
+                <tr>
+                  <th>Image</th>
+                  <th>Name</th>
+                  <th>Price</th>
+                  <th>Category</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {orders.map(o => (
-                  <tr key={o.id} style={{ borderBottom: "1px solid #ddd" }}>
-                    <td style={{ padding: "10px" }}>#{o.id}</td>
-                    <td style={{ padding: "10px" }}>{o.customerName}</td>
-                    <td style={{ padding: "10px" }}>P{o.totalAmount}</td>
-                    <td style={{ padding: "10px" }}>
-                      <ul style={{ margin: 0, paddingLeft: "20px" }}>
-                        {o.items.map(item => (
-                          <li key={item.id}>{item.quantity}x {item.food.name}</li>
-                        ))}
-                      </ul>
+                {foods.length === 0 && (
+                  <tr>
+                    <td colSpan={5} style={{ textAlign: "center", color: "#aaa", padding: "30px" }}>
+                      No food items yet. Add one above!
                     </td>
-                    <td style={{ padding: "10px", fontWeight: "bold", color: o.status === "PENDING" ? "#f39c12" : "#27ae60" }}>
-                      {o.status}
+                  </tr>
+                )}
+                {foods.map((f) => (
+                  <tr key={f.id}>
+                    <td>
+                      <img
+                        src={f.img}
+                        alt={f.name}
+                        className="admin-food-img"
+                        onError={(e) => { e.target.src = "https://via.placeholder.com/50"; }}
+                      />
+                    </td>
+                    <td>
+                      <div style={{ fontWeight: 600 }}>{f.name}</div>
+                      {f.description && (
+                        <div style={{ fontSize: "12px", color: "#888", marginTop: "2px" }}>
+                          {f.description}
+                        </div>
+                      )}
+                    </td>
+                    <td style={{ fontWeight: 600 }}>₱{f.price}</td>
+                    <td>
+                      <span className="admin-category-badge">{f.category}</span>
+                    </td>
+                    <td>
+                      <button className="admin-edit-btn" onClick={() => editFood(f)}>
+                        ✏️ Edit
+                      </button>
+                      <button className="admin-delete-btn" onClick={() => deleteFood(f.id)}>
+                        🗑️ Delete
+                      </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+
+        {/* ════════════ ORDERS TAB ════════════ */}
+        {activeTab === "orders" && (
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+              <h3 style={{ margin: 0, fontSize: "20px", fontWeight: 700 }}>
+                All Customer Orders
+              </h3>
+              <button className="admin-refresh-btn" onClick={fetchOrders}>
+                🔄 Refresh
+              </button>
+            </div>
+
+            {orders.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "60px 0", color: "#aaa" }}>
+                <div style={{ fontSize: "48px", marginBottom: "12px" }}>📭</div>
+                <p>No orders yet.</p>
+              </div>
+            ) : (
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Items</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Update Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.map((o) => (
+                    <tr key={o.id}>
+                      <td style={{ fontWeight: 700 }}>#{o.id}</td>
+                      <td>{o.customerName}</td>
+                      <td>
+                        <div style={{ maxHeight: "80px", overflowY: "auto" }}>
+                          {o.items && o.items.map((item) => (
+                            <div key={item.id} style={{ fontSize: "12px", color: "#555", padding: "2px 0" }}>
+                              • {item.quantity}x {item.food?.name || "Item"}
+                            </div>
+                          ))}
+                        </div>
+                      </td>
+                      <td style={{ fontWeight: 700 }}>₱{o.totalAmount}</td>
+                      <td>
+                        <span style={{
+                          display: "inline-block",
+                          padding: "4px 12px",
+                          borderRadius: "20px",
+                          fontSize: "12px",
+                          fontWeight: 700,
+                          color: getStatusColor(o.status),
+                          background: o.status === "COMPLETED" ? "#d4edda"
+                            : o.status === "CANCELLED" ? "#fde8e8" : "#fff3cd",
+                        }}>
+                          {o.status}
+                        </span>
+                      </td>
+                      <td>
+                        <select
+                          className="admin-status-select"
+                          value={o.status}
+                          onChange={(e) => handleStatusChange(o.id, e.target.value)}
+                          disabled={updatingOrderId === o.id}
+                          style={{
+                            borderColor: getStatusColor(o.status),
+                            color: getStatusColor(o.status),
+                          }}
+                        >
+                          {STATUS_OPTIONS.map((s) => (
+                            <option key={s} value={s}>{s}</option>
+                          ))}
+                        </select>
+                        {updatingOrderId === o.id && (
+                          <span style={{ marginLeft: "8px", fontSize: "12px", color: "#888" }}>
+                            Saving...
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
