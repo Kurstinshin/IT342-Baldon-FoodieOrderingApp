@@ -1,19 +1,29 @@
+/**
+ * App.jsx — Routing Root
+ *
+ * Vertical Slice Architecture: imports are grouped by feature.
+ * Each feature owns its page component alongside its styles and context.
+ */
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { CartProvider } from "./features/cart/CartContext";
 
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
-import Cart from "./pages/Cart";
-import Checkout from "./pages/Checkout";
-import AdminDashboard from "./pages/AdminDashboard";
-import OrderHistory from "./pages/OrderHistory";
+// ── Feature Pages ──────────────────────────────────────────────────────────
+import Home          from "./pages/Home";           // Landing (shared)
+import LoginPage     from "./features/auth/LoginPage";
+import RegisterPage  from "./features/auth/RegisterPage";
+import DashboardPage from "./features/dashboard/DashboardPage";
+import CartPage      from "./features/cart/CartPage";
+import CheckoutPage  from "./features/checkout/CheckoutPage";
+import OrderHistoryPage from "./features/orders/OrderHistoryPage";
+import AdminDashboardPage from "./features/admin/AdminDashboardPage";
 
-import About from "./pages/About";
+// Static pages
+import About   from "./pages/About";
 import Service from "./pages/Service";
-import Blog from "./pages/Blog";
+import Blog    from "./pages/Blog";
 import Contact from "./pages/Contact";
 
+// ── Guards ─────────────────────────────────────────────────────────────────
 function PrivateRoute({ children }) {
   const token = localStorage.getItem("token");
   return token ? children : <Navigate to="/login" replace />;
@@ -24,41 +34,42 @@ function AdminRoute({ children }) {
   return role === "ADMIN" ? children : <Navigate to="/dashboard" replace />;
 }
 
+// ── App ────────────────────────────────────────────────────────────────────
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
+    <CartProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* 🏠 Landing */}
+          <Route path="/" element={<Home />} />
 
-        {/* 🏠 LANDING */}
-        <Route path="/" element={<Home />} />
+          {/* 🔐 Auth feature */}
+          <Route path="/login"    element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
 
-        {/* 🔐 AUTH */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+          {/* 🍔 Dashboard feature */}
+          <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
 
-        {/* 🍔 MAIN - PROTECTED */}
-        <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+          {/* 🛒 Cart feature */}
+          <Route path="/cart" element={<PrivateRoute><CartPage /></PrivateRoute>} />
 
-        {/* 🛒 CART - PROTECTED */}
-        <Route path="/cart" element={<PrivateRoute><Cart /></PrivateRoute>} />
+          {/* 💳 Checkout feature */}
+          <Route path="/checkout" element={<PrivateRoute><CheckoutPage /></PrivateRoute>} />
 
-        {/* 💳 CHECKOUT - PROTECTED */}
-        <Route path="/checkout" element={<PrivateRoute><Checkout /></PrivateRoute>} />
+          {/* 📦 Orders feature */}
+          <Route path="/orders" element={<PrivateRoute><OrderHistoryPage /></PrivateRoute>} />
 
-        {/* 📦 ORDERS - PROTECTED */}
-        <Route path="/orders" element={<PrivateRoute><OrderHistory /></PrivateRoute>} />
+          {/* 👑 Admin feature */}
+          <Route path="/admin" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />
 
-        {/* 👑 ADMIN - PROTECTED */}
-        <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-
-        {/* 📄 PAGES */}
-        <Route path="/about" element={<About />} />
-        <Route path="/service" element={<Service />} />
-        <Route path="/blog" element={<Blog />} />
-        <Route path="/contact" element={<Contact />} />
-
-      </Routes>
-    </BrowserRouter>
+          {/* 📄 Static pages */}
+          <Route path="/about"   element={<About />} />
+          <Route path="/service" element={<Service />} />
+          <Route path="/blog"    element={<Blog />} />
+          <Route path="/contact" element={<Contact />} />
+        </Routes>
+      </BrowserRouter>
+    </CartProvider>
   );
 }
 

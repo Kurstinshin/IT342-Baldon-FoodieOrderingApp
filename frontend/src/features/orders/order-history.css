@@ -1,0 +1,210 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+/* ===== PAGE WRAPPER ===== */
+.oh-page {
+  min-height: 100vh;
+  background: #f4f6fb;
+  font-family: 'Poppins', sans-serif;
+  padding-bottom: 60px;
+}
+
+/* ===== TOP BAR ===== */
+.oh-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.oh-back-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: #333;
+  padding: 4px;
+}
+
+.oh-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  color: #222;
+}
+
+.oh-refresh-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  padding: 4px;
+  transition: transform 0.3s;
+}
+
+.oh-refresh-btn:hover {
+  transform: rotate(180deg);
+}
+
+/* ===== BODY ===== */
+.oh-body {
+  max-width: 700px;
+  margin: 24px auto;
+  padding: 0 20px;
+}
+
+/* ===== LOADING ===== */
+.oh-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80px 0;
+  color: #aaa;
+}
+
+.oh-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f0e6ff;
+  border-top-color: #6a1b9a;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== EMPTY STATE ===== */
+.oh-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  text-align: center;
+}
+
+.oh-empty-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
+.oh-empty h3 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 8px;
+}
+
+.oh-empty p {
+  font-size: 14px;
+  color: #888;
+  margin: 0 0 24px;
+}
+
+.oh-browse-btn {
+  padding: 12px 32px;
+  background: linear-gradient(135deg, #fbd65b, #f2994a);
+  border: none;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  transition: opacity 0.2s;
+}
+
+.oh-browse-btn:hover {
+  opacity: 0.9;
+}
+
+/* ===== ORDER LIST ===== */
+.oh-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ===== ORDER CARD ===== */
+.oh-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+
+.oh-card:hover {
+  transform: translateY(-2px);
+}
+
+.oh-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.oh-order-id {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: #222;
+}
+
+.oh-customer {
+  display: block;
+  font-size: 12px;
+  color: #888;
+  margin-top: 4px;
+}
+
+.oh-status-badge {
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ===== ITEMS ===== */
+.oh-items {
+  padding: 12px 18px;
+  background: #fafafa;
+}
+
+.oh-item-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #555;
+  padding: 5px 0;
+  border-bottom: 1px dashed #eee;
+}
+
+.oh-item-row:last-child {
+  border-bottom: none;
+}
+
+/* ===== CARD FOOTER ===== */
+.oh-card-footer {
+  padding: 12px 18px;
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid #f0f0f0;
+}
+
+.oh-total {
+  font-size: 15px;
+  font-weight: 700;
+  color: #222;
+}
