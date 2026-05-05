@@ -1,4 +1,4 @@
-package edu.cit.baldon.foodieorderingapp.feature.auth;
+package edu.cit.baldon.foodieorderingapp.feature.food;
 
 import jakarta.persistence.*;
 
