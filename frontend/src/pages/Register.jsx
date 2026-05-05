@@ -40,7 +40,7 @@ function Register() {
 
         <div className="auth-content">
 
-          <div className="app-name">🍽️ FoodieApp</div>
+          <div className="app-name">🍽️ FoodieOrderingApp</div>
 
           {/* TABS */}
           <div className="tabs">
