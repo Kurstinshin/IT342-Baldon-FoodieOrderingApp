@@ -8,20 +8,20 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CartProvider } from "./features/cart/CartContext";
 
 // ── Feature Pages ──────────────────────────────────────────────────────────
-import Home          from "./pages/Home";           // Landing (shared)
-import LoginPage     from "./features/auth/LoginPage";
-import RegisterPage  from "./features/auth/RegisterPage";
-import DashboardPage from "./features/dashboard/DashboardPage";
-import CartPage      from "./features/cart/CartPage";
-import CheckoutPage  from "./features/checkout/CheckoutPage";
-import OrderHistoryPage from "./features/orders/OrderHistoryPage";
+import Home              from "./features/home/HomePage";
+import LoginPage         from "./features/auth/LoginPage";
+import RegisterPage      from "./features/auth/RegisterPage";
+import DashboardPage     from "./features/dashboard/DashboardPage";
+import CartPage          from "./features/cart/CartPage";
+import CheckoutPage      from "./features/checkout/CheckoutPage";
+import OrderHistoryPage  from "./features/orders/OrderHistoryPage";
 import AdminDashboardPage from "./features/admin/AdminDashboardPage";
 
 // Static pages
-import About   from "./pages/About";
-import Service from "./pages/Service";
-import Blog    from "./pages/Blog";
-import Contact from "./pages/Contact";
+import About   from "./features/static/About";
+import Service from "./features/static/Service";
+import Blog    from "./features/static/Blog";
+import Contact from "./features/static/Contact";
 
 // ── Guards ─────────────────────────────────────────────────────────────────
 function PrivateRoute({ children }) {
@@ -40,7 +40,7 @@ function App() {
     <CartProvider>
       <BrowserRouter>
         <Routes>
-          {/* 🏠 Landing */}
+          {/* 🏠 Home feature */}
           <Route path="/" element={<Home />} />
 
           {/* 🔐 Auth feature */}
@@ -62,7 +62,7 @@ function App() {
           {/* 👑 Admin feature */}
           <Route path="/admin" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />
 
-          {/* 📄 Static pages */}
+          {/* 📄 Static feature */}
           <Route path="/about"   element={<About />} />
           <Route path="/service" element={<Service />} />
           <Route path="/blog"    element={<Blog />} />

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Burger bun top -->
+    <path
+        android:fillColor="#6A1B9A"
+        android:pathData="M27,42 Q54,22 81,42 Z" />
+    <!-- Burger patty -->
+    <path
+        android:fillColor="#4A1010"
+        android:pathData="M24,50 Q54,44 84,50 L84,58 Q54,64 24,58 Z" />
+    <!-- Burger bun bottom -->
+    <path
+        android:fillColor="#6A1B9A"
+        android:pathData="M27,66 Q54,78 81,66 L84,66 Q54,86 24,66 Z" />
+</vector>

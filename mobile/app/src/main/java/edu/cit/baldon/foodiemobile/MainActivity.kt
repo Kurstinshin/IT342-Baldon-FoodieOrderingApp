@@ -48,19 +48,29 @@ fun FoodieApp(session: SessionManager) {
 
     // Decide start destination
     val start = when {
-        !session.isLoggedIn() -> "login"
+        !session.isLoggedIn() -> "home"         // Start at home if not logged in
         session.isAdmin()     -> "admin"
         else                  -> "dashboard"
     }
 
     NavHost(navController = navController, startDestination = start) {
 
+        // ── Home (landing page) ─────────────────────────────────────────────
+        composable("home") {
+            HomeScreen(
+                onGoLogin    = { navController.navigate("login") },
+                onGoRegister = { navController.navigate("register") },
+                onOrderFood  = { navController.navigate("login") }
+            )
+        }
+
+        // ── Auth ────────────────────────────────────────────────────────────
         composable("login") {
             LoginScreen(
                 vm = authVm,
                 onLoginSuccess = { role ->
                     val dest = if (role == "ADMIN") "admin" else "dashboard"
-                    navController.navigate(dest) { popUpTo("login") { inclusive = true } }
+                    navController.navigate(dest) { popUpTo(0) { inclusive = true } }
                 },
                 onGoRegister = { navController.navigate("register") }
             )
@@ -69,14 +79,14 @@ fun FoodieApp(session: SessionManager) {
         composable("register") {
             RegisterScreen(
                 vm = authVm,
-                onRegisterSuccess = { role ->
-                    val dest = if (role == "ADMIN") "admin" else "dashboard"
-                    navController.navigate(dest) { popUpTo("register") { inclusive = true } }
-                },
-                onGoLogin = { navController.popBackStack() }
+                onRegisterSuccess = { /* unused — handled via Registered state */ },
+                onGoLogin = {
+                    navController.navigate("login") { popUpTo("home") }
+                }
             )
         }
 
+        // ── Dashboard ───────────────────────────────────────────────────────
         composable("dashboard") {
             val userId = session.getUserId()
             DashboardScreen(
@@ -87,11 +97,12 @@ fun FoodieApp(session: SessionManager) {
                 onGoOrders  = { navController.navigate("orders") },
                 onLogout    = {
                     session.clearSession()
-                    navController.navigate("login") { popUpTo(0) { inclusive = true } }
+                    navController.navigate("home") { popUpTo(0) { inclusive = true } }
                 }
             )
         }
 
+        // ── Cart ────────────────────────────────────────────────────────────
         composable("cart") {
             val userId = session.getUserId()
             CartScreen(
@@ -102,6 +113,7 @@ fun FoodieApp(session: SessionManager) {
             )
         }
 
+        // ── Checkout ────────────────────────────────────────────────────────
         composable("checkout") {
             val userId = session.getUserId()
             CheckoutScreen(
@@ -114,6 +126,7 @@ fun FoodieApp(session: SessionManager) {
             )
         }
 
+        // ── Order History ───────────────────────────────────────────────────
         composable("orders") {
             val userId = session.getUserId()
             OrderHistoryScreen(
@@ -123,13 +136,14 @@ fun FoodieApp(session: SessionManager) {
             )
         }
 
+        // ── Admin ───────────────────────────────────────────────────────────
         composable("admin") {
             AdminDashboardScreen(
                 dashVm   = dashVm,
                 orderVm  = orderVm,
                 onLogout = {
                     session.clearSession()
-                    navController.navigate("login") { popUpTo(0) { inclusive = true } }
+                    navController.navigate("home") { popUpTo(0) { inclusive = true } }
                 }
             )
         }

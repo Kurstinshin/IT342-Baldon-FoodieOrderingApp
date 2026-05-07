@@ -14,6 +14,7 @@ sealed class AuthState {
     object Idle : AuthState()
     object Loading : AuthState()
     data class Success(val role: String) : AuthState()
+    object Registered : AuthState()                        // <-- new state
     data class Error(val message: String) : AuthState()
 }
 
@@ -54,9 +55,8 @@ class AuthViewModel(private val session: SessionManager) : ViewModel() {
             try {
                 val res = ApiClient.service.register(RegisterRequest(name.trim(), email.trim(), password))
                 if (res.success && res.data != null) {
-                    val d = res.data
-                    session.saveSession(d.token, d.userId, d.username, d.role)
-                    _state.value = AuthState.Success(d.role)
+                    // Don't save session — redirect to login instead
+                    _state.value = AuthState.Registered
                 } else {
                     _state.value = AuthState.Error(res.message.ifBlank { "Registration failed" })
                 }
