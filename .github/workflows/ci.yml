@@ -20,7 +20,9 @@ jobs:
         cache: maven
     - name: Make mvnw executable
       working-directory: ./backend
-      run: chmod +x mvnw
+      run: |
+        sed -i 's/\r$//' mvnw
+        chmod +x mvnw
     - name: Build and Test Backend
       working-directory: ./backend
       run: ./mvnw test
@@ -56,7 +58,9 @@ jobs:
         cache: gradle
     - name: Make gradlew executable
       working-directory: ./mobile
-      run: chmod +x gradlew
+      run: |
+        sed -i 's/\r$//' gradlew
+        chmod +x gradlew
     - name: Run mobile unit tests
       working-directory: ./mobile
       run: ./gradlew testDebugUnitTest
